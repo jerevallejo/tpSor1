@@ -5,7 +5,7 @@
 #include <semaphore.h> //para usar semaforos
 #include <unistd.h>     // para hacer sleep
 
-int proceso = 10;//aca declaro la candidad de veces que se van a ejecutar los procesos
+int proceso = 20;//aca declaro la candidad de veces que se van a ejecutar los procesos
 pthread_mutex_t mutex;
 bool puedeLeer = false;
 bool puedeEscribir = true;
@@ -17,7 +17,7 @@ void *escribir(){
                 puedeEscribir = false;
                 printf("Escribiendo datos");
                 printf("\n");
-                sleep(1);//duerme el proceso 2 segundos simpulando la escritura
+                sleep(2);//duerme el proceso 2 segundos simpulando la escritura
                 puedeLeer = true;
                 pthread_mutex_unlock(&mutex);
         }
@@ -42,8 +42,8 @@ int main(void)
                 for (int i = 0; i < proceso; ++i)
                 {
                         
-                printf("i %i", i);
-                printf("\n");
+            //    printf("i %i", i);
+              //  printf("\n");
                 //se declaran los hilos
                 pthread_t hiloLeer;
                 pthread_t hiloEscribir;
