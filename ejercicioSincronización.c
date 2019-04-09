@@ -20,20 +20,17 @@ sem_t aux;
 void* jugar()
 {
 	while(rondaActual<CANTIDAD_RONDAS)
-	{
-		//printf("dentro del while jugar\n");
+	{	
      	sem_wait(&jug);
         pthread_mutex_lock(&mutex);
 
 		printf("dentro del mutex jugar\n");
-        //sem_wait(&jug);
 
 	    printf("---> jugar \n");
 
 	    sem_post(&per);
 	    sem_post(&gan);
 	    sem_post(&aux);
-	    printf("esta antesde salir del mutex\n");
 
 	    pthread_mutex_unlock(&mutex);
 	} 
@@ -51,9 +48,9 @@ void* perder()
 	    sem_wait(&per);
 
 //printf("antes del mutex perder\n");
-	    pthread_mutex_lock(&mutex);
-	    printf("dentro del mutex perder\n");
 
+//7	    pthread_mutex_lock(&mutex);
+	//    printf("dentro del mutex perder\n");
 	   	sem_wait(&aux);
 	   	 
 	   // printf("dentro del mutex perder\n");
@@ -64,19 +61,20 @@ void* perder()
 	    {
 				pthread_exit(NULL);
 	    }else{
+	    		pthread_mutex_lock(&mutex);
 	    		salioPerder +=1;
 	    		printf("---> perder \n");
-	    		
-	   	sem_wait(&gan);
-	    sem_post(&des);
+			    sem_wait(&gan);
+			    sem_post(&des);
+				pthread_mutex_unlock(&mutex);
 		}
 
 //	   	sem_wait(&gan);
 //	    sem_post(&des);
 
 				
-	   printf("antes de salir del mutex perder\n");
-	    pthread_mutex_unlock(&mutex);
+	   //printf("antes de salir del mutex perder\n");
+	  //  pthread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
 
@@ -90,12 +88,6 @@ void* ganar()
 	    	  //  pthread_mutex_lock(&mutex);
 		//printf("dntreo del while ganar\n");
 	    sem_wait(&gan);  
-
-	       // sem_wait(&aux);
-////printf("antes del mutex ganar\n");
-	    pthread_mutex_lock(&mutex);
-	    //printf("dentro del mutex ganar\n");
-
 	    sem_wait(&aux);
 
 	//sem_wait(&per); 
@@ -103,13 +95,15 @@ void* ganar()
 	    {
 				pthread_exit(NULL);
 	    }else{
-	    	salioGanar +=1;
-		    printf("---> ganar \n");
+	    		pthread_mutex_lock(&mutex);
+		    	salioGanar +=1;
+			    printf("---> ganar \n");
+				sem_wait(&per);
+			    sem_post(&des);
+				pthread_mutex_unlock(&mutex);
 		}
-		sem_wait(&per);
-	    sem_post(&des);
-
-	    pthread_mutex_unlock(&mutex);
+//printf("antes salir mutex ganar\n");
+	   //thread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
  
