@@ -5,6 +5,7 @@
 #include <semaphore.h> //para usar semaforos
 #include <unistd.h>     // para hacer sleep
 
+//usar semaforos no la bariable bool
 int proceso = 20;//aca declaro la candidad de veces que se van a ejecutar los procesos
 pthread_mutex_t mutex;
 bool puedeLeer = false;
