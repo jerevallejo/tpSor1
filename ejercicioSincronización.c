@@ -22,17 +22,18 @@ void* jugar()
 	while(rondaActual<CANTIDAD_RONDAS)
 	{
 		//printf("dentro del while jugar\n");
-     	//sem_wait(&jug);
+     	sem_wait(&jug);
         pthread_mutex_lock(&mutex);
 
 		printf("dentro del mutex jugar\n");
-        sem_wait(&jug);
+        //sem_wait(&jug);
 
 	    printf("---> jugar \n");
 
 	    sem_post(&per);
 	    sem_post(&gan);
 	    sem_post(&aux);
+	    printf("esta antesde salir del mutex\n");
 
 	    pthread_mutex_unlock(&mutex);
 	} 
@@ -50,14 +51,14 @@ void* perder()
 	    sem_wait(&per);
 
 //printf("antes del mutex perder\n");
-//	    pthread_mutex_lock(&mutex);
-//	    printf("dentro del mutex perder\n");
+	    pthread_mutex_lock(&mutex);
+	    printf("dentro del mutex perder\n");
 
 	   	sem_wait(&aux);
 	   	 
 	   // printf("dentro del mutex perder\n");
 
-	   	//sem_wait(&gan);
+//	   	sem_wait(&gan);
 
 	    if (rondaActual>=(CANTIDAD_RONDAS +1))
 	    {
@@ -65,12 +66,17 @@ void* perder()
 	    }else{
 	    		salioPerder +=1;
 	    		printf("---> perder \n");
-		}
+	    		
+	   	sem_wait(&gan);
 	    sem_post(&des);
-	    
-		sem_wait(&gan);		
+		}
 
-	  //  pthread_mutex_unlock(&mutex);
+//	   	sem_wait(&gan);
+//	    sem_post(&des);
+
+				
+	   printf("antes de salir del mutex perder\n");
+	    pthread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
 
@@ -85,12 +91,12 @@ void* ganar()
 		//printf("dntreo del while ganar\n");
 	    sem_wait(&gan);  
 
-	        sem_wait(&aux);
+	       // sem_wait(&aux);
 ////printf("antes del mutex ganar\n");
-///	    pthread_mutex_lock(&mutex);
+	    pthread_mutex_lock(&mutex);
 	    //printf("dentro del mutex ganar\n");
 
-//	    sem_wait(&aux);
+	    sem_wait(&aux);
 
 	//sem_wait(&per); 
 	    if (rondaActual>=(CANTIDAD_RONDAS +1))
@@ -103,7 +109,7 @@ void* ganar()
 		sem_wait(&per);
 	    sem_post(&des);
 
-	   // pthread_mutex_unlock(&mutex);
+	    pthread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
  
@@ -115,7 +121,7 @@ void* descansar()
 	{
 	    sem_wait(&des);
 
-	    pthread_mutex_lock(&mutex);
+	    //pthread_mutex_lock(&mutex);
 
 	    printf("---> descansar  \n"); 
 	    rondaActual += 1;
@@ -134,7 +140,7 @@ void* descansar()
 	    	
 	    }
 	    sem_post(&jug);
-	    pthread_mutex_unlock(&mutex);
+	   // pthread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
 
