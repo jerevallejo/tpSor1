@@ -4,12 +4,22 @@
 #include <semaphore.h> //para usar semaforos
 #include <unistd.h>     // para hacer sleep
 
+//se inicia el mutex. 
 pthread_mutex_t mutex;
-#define CANTIDAD_RONDAS 3000
+
+//aca asignamos la cantidad de rodas que se van a jugar.
+#define CANTIDAD_RONDAS 40
+
+//se inician los contadores.
 int rondaActual = 1;
 int salioGanar = 0;
 int salioPerder = 0;
-//inicializo los semaforos
+
+//estas variables enteras eran utilizadas para ver los valores de los semaforos 
+//int valueGan;
+//int valuePer; 
+
+//inicializan los semaforos.
 sem_t jug;
 sem_t gan;
 sem_t per;
@@ -21,20 +31,14 @@ void* jugar()
 {
 	while(rondaActual<CANTIDAD_RONDAS)
 	{
-		//printf("dentro del while jugar\n");
      	sem_wait(&jug);
         pthread_mutex_lock(&mutex);
-
-		printf("dentro del mutex jugar\n");
-        //sem_wait(&jug);
-
 	    printf("---> jugar \n");
 
 	    sem_post(&per);
 	    sem_post(&gan);
 	    sem_post(&aux);
-	    printf("esta antesde salir del mutex\n");
-
+	 
 	    pthread_mutex_unlock(&mutex);
 	} 
 	pthread_exit(NULL);
@@ -45,38 +49,17 @@ void* perder()
 
 	while(rondaActual<CANTIDAD_RONDAS)
 	{
-		//printf("dentro del while perder\n");
-		
-//pthread_mutex_lock(&mutex);
 	    sem_wait(&per);
-
-//printf("antes del mutex perder\n");
-	    pthread_mutex_lock(&mutex);
-	    printf("dentro del mutex perder\n");
-
 	   	sem_wait(&aux);
 	   	 
-	   // printf("dentro del mutex perder\n");
-
-//	   	sem_wait(&gan);
-
 	    if (rondaActual>=(CANTIDAD_RONDAS +1))
 	    {
 				pthread_exit(NULL);
 	    }else{
 	    		salioPerder +=1;
 	    		printf("---> perder \n");
-	    		
-	   	sem_wait(&gan);
-	    sem_post(&des);
 		}
-
-//	   	sem_wait(&gan);
-//	    sem_post(&des);
-
-				
-	   printf("antes de salir del mutex perder\n");
-	    pthread_mutex_unlock(&mutex);
+	    sem_post(&des);
 	}
 	pthread_exit(NULL);
 
@@ -86,19 +69,9 @@ void* ganar()
 {
 	while(rondaActual<CANTIDAD_RONDAS)
 	{
-
-	    	  //  pthread_mutex_lock(&mutex);
-		//printf("dntreo del while ganar\n");
 	    sem_wait(&gan);  
-
-	       // sem_wait(&aux);
-////printf("antes del mutex ganar\n");
-	    pthread_mutex_lock(&mutex);
-	    //printf("dentro del mutex ganar\n");
-
 	    sem_wait(&aux);
 
-	//sem_wait(&per); 
 	    if (rondaActual>=(CANTIDAD_RONDAS +1))
 	    {
 				pthread_exit(NULL);
@@ -106,10 +79,7 @@ void* ganar()
 	    	salioGanar +=1;
 		    printf("---> ganar \n");
 		}
-		sem_wait(&per);
 	    sem_post(&des);
-
-	    pthread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
  
@@ -121,26 +91,30 @@ void* descansar()
 	{
 	    sem_wait(&des);
 
-	    //pthread_mutex_lock(&mutex);
+	    pthread_mutex_lock(&mutex);
 
 	    printf("---> descansar  \n"); 
 	    rondaActual += 1;
-	    if (rondaActual == (CANTIDAD_RONDAS +1))
+	    if (rondaActual == (CANTIDAD_RONDAS+1))
 	    {
+	    	//cuando pasa la ultima ronda se habilitan todos los semaforos 
+	    	//para que se finalicen todos los hilos. 
+	    	//Despues de eso se imprime el mensaje de fin de jeugo y se muestran los resultados.
 	    	sem_post(&per);
 	    	sem_post(&gan);
 	    	sem_post(&aux);
 	    	sem_post(&jug);
-	    	printf("----EL JUEGO TERMINO.----\nResultados: \n");
-	    	printf("Ganar:%i \n",salioGanar );
-	    	printf("Perder: %i \n",salioPerder );
+	    	printf("----EL JUEGO TERMINO----\nResultados: \n");
+	    	printf("	Ganar:%i \n",salioGanar );
+	    	printf("	Perder: %i \n",salioPerder );
+
 	    	pthread_exit(NULL);
 	    }else{		
+	    	//como no es la ultima ronda se muestra el numero de ronda y se vuelve a jugar.
 	    	printf("Ronda de juego numero: %i \n" , rondaActual);
-	    	
+	    	sem_post(&jug);
 	    }
-	    sem_post(&jug);
-	   // pthread_mutex_unlock(&mutex);
+	    pthread_mutex_unlock(&mutex);
 	}
 	pthread_exit(NULL);
 
@@ -148,7 +122,6 @@ void* descansar()
 
 int main() 
 {               
-
     //se declaran los hilos
     pthread_t hiloJugar;
     pthread_t hiloGanar;
@@ -175,7 +148,7 @@ int main()
     pthread_join(hiloPerder, NULL);
     pthread_join(hiloDescansar, NULL);
 
-
+	//se destruyen los hilos
     sem_destroy(&jug);
 	sem_destroy(&per);
 	sem_destroy(&gan);
@@ -183,6 +156,10 @@ int main()
 	sem_destroy(&aux);
 
 	pthread_exit(NULL);
+
 return 0;
 
 }
+
+//Para compilar:   gcc ejercicioSincronizacion.c -o ejSincronizacion -lpthread
+//Para ejecutar:   ./ejSincronizacion
