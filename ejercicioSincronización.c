@@ -30,7 +30,7 @@ sem_t aux;
 void* jugar()
 {
 	while(rondaActual<CANTIDAD_RONDAS)
-	{
+	{	
      	sem_wait(&jug);
         pthread_mutex_lock(&mutex);
 	    printf("---> jugar \n");
@@ -38,7 +38,7 @@ void* jugar()
 	    sem_post(&per);
 	    sem_post(&gan);
 	    sem_post(&aux);
-	 
+
 	    pthread_mutex_unlock(&mutex);
 	} 
 	pthread_exit(NULL);
@@ -58,7 +58,7 @@ void* perder()
 	    }else{
 	    		salioPerder +=1;
 	    		printf("---> perder \n");
-		}
+	    }
 	    sem_post(&des);
 	}
 	pthread_exit(NULL);
@@ -76,13 +76,12 @@ void* ganar()
 	    {
 				pthread_exit(NULL);
 	    }else{
-	    	salioGanar +=1;
-		    printf("---> ganar \n");
+		    	salioGanar +=1;
+			    printf("---> ganar \n");
 		}
 	    sem_post(&des);
 	}
 	pthread_exit(NULL);
- 
 }
 
 void* descansar()
