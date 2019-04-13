@@ -3,8 +3,7 @@
 int main() 
 { 
 	while(1){
-    	fork(); 
-    	printf("BOOM!");
+    	fork();
 	}
     return 0; 
 }
