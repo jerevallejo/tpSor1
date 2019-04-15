@@ -3,6 +3,7 @@
 #include <pthread.h>
 #include <semaphore.h> //para usar semaforos
 #include <unistd.h>     // para hacer sleep
+#include <sched.h>
 
 //se inicia el mutex. 
 pthread_mutex_t mutex;
@@ -123,9 +124,21 @@ int main()
 {               
     //se declaran los hilos
     pthread_t hiloJugar;
-    pthread_t hiloGanar;
     pthread_t hiloPerder;
     pthread_t hiloDescansar;
+
+	pthread_attr_t attr;
+	int ret;
+    pthread_t hiloGanar;
+	struct sched_param param;
+
+	ret = pthread_attr_init (&attr);/* setear los atributos por defecto*/
+	ret = pthread_attr_getschedparam (&attr, &param); /*obtener los parametros de scheduling*/
+	(param.sched_priority)++;/*aumentar la prioridad*/
+	//param.sched_priority = 1000;
+	ret = pthread_attr_setschedparam (&attr, &param);	/* setear los nuevos parametos al scheduling*/ 
+
+
 
 	//se inician los hilos
     sem_init(&jug,0,1);
@@ -137,9 +150,13 @@ int main()
 
     //se crean los hilos y se les asigna la funcion a ejecutar
     pthread_create(&hiloJugar, NULL, &jugar, NULL);
-    pthread_create(&hiloGanar, NULL, &ganar, NULL);
+    ret = pthread_create(&hiloGanar, &attr, &ganar, NULL);
+    //pthread_create(&hiloGanar, NULL, &ganar, NULL);
     pthread_create(&hiloPerder, NULL, &perder, NULL);
     pthread_create(&hiloDescansar, NULL, &descansar, NULL);
+
+    //le asignamos prioridad al hilo ganar
+    //pthread_setschedprio(pthread_t &hiloGanar, int 20);
                 
     //se espera a que los hilos terminen su ejecucion y se muestran 
     pthread_join(hiloJugar, NULL);
